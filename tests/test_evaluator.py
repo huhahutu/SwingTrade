@@ -25,7 +25,7 @@ def sample_buy_record():
             "stop_loss_triggered": None,
             "holding_period_days": None,
         },
-        "trade_outcome": "DRAW",
+        "trade_outcome": None,
         "post_analysis_notes": "Final Decision: BUY",
     }
 
@@ -47,7 +47,7 @@ def sample_hold_record():
             "stop_loss_triggered": None,
             "holding_period_days": None,
         },
-        "trade_outcome": "DRAW",
+        "trade_outcome": None,
         "post_analysis_notes": "Final Decision: HOLD",
     }
 
@@ -116,6 +116,15 @@ def test_skip_hold_record(sample_hold_record):
     """bought_price が None のレコードは評価をスキップすること"""
     evaluator = TradeEvaluator(holding_days=5)
     result = evaluator.evaluate(sample_hold_record)
+
+    assert result is None
+
+
+def test_skip_evaluated_record(sample_buy_record):
+    """すでに trade_outcome が設定されているレコードは評価をスキップすること"""
+    sample_buy_record["trade_outcome"] = "WIN"
+    evaluator = TradeEvaluator(holding_days=5)
+    result = evaluator.evaluate(sample_buy_record)
 
     assert result is None
 

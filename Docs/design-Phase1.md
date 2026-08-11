@@ -64,13 +64,13 @@
     "stop_loss_triggered": null,
     "holding_period_days": null
   },
-  "trade_outcome": "DRAW",
+  "trade_outcome": null,
   "post_analysis_notes": ""
 }
 
 ```
 
-※ `execution_result` と `trade_outcome` は初期段階では未決済のためnullや仮の値を設定しておく。
+※ `execution_result` と `trade_outcome` は初期段階では未決済のため null を設定しておく。
 
 ## 4. 成果物
 

@@ -44,4 +44,4 @@ def test_log_trade_decision(tmp_path):
     assert record["ai_score"] == 4.5
     assert record["technical_indicators"]["ma25_trend"] == "UPWARD"
     assert record["technical_indicators"]["entry_price"] == 2500.0
-    assert record["trade_outcome"] == "DRAW"
+    assert record["trade_outcome"] is None

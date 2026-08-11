@@ -34,10 +34,12 @@ class TradeEvaluator:
         """
         1件の取引ログを評価する。
 
-        bought_price が None のレコード（HOLD判定など）はスキップして None を返す。
+        bought_price が None のレコード（HOLD判定など）、
+        またはすでに trade_outcome が確定済み (None, "DRAW", "" 以外) のレコードはスキップして None を返す。
         """
         bought_price: float | None = record["execution_result"]["bought_price"]
-        if bought_price is None:
+        outcome = record.get("trade_outcome")
+        if bought_price is None or outcome not in [None, "DRAW", ""]:
             return None
 
         ticker_symbol: str = record["ticker_symbol"]

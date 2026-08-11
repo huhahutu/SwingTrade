@@ -69,6 +69,17 @@ python main.py --ticker 7203.T
 python main.py --ticker 7203.T --use-rag
 ```
 
+### 取引ログの勝敗判定・結果更新
+蓄積された `trade_logs.jsonl` を読み込み、指定日数後（デフォルト5日）の株価に基づいて損益率と勝敗（WIN/LOSS/DRAW）を自動計算し、ログファイルを更新します。
+
+```bash
+# デフォルト（5日後で評価）
+python -m src.evaluator --log-file data/trade_logs.jsonl
+
+# 保有期間を変える場合（例: 10日後）
+python -m src.evaluator --log-file data/trade_logs.jsonl --holding-days 10
+```
+
 ## テストの実行方法
 本プロジェクトでは `pytest` を使用したテスト駆動開発（TDD）を採用しています。外部API (`yfinance`, Gemini API) 通信はすべてモック化されているため、APIキーなしで安全かつ高速に実行可能です。
 

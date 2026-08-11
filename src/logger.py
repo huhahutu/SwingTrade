@@ -39,7 +39,7 @@ class KnowledgeLogger:
                 "stop_loss_triggered": None,
                 "holding_period_days": None,
             },
-            "trade_outcome": "DRAW",
+            "trade_outcome": None,
             "post_analysis_notes": f"Final Decision: {decision_result.final_action}. Reason: {decision_result.reason}",
         }
 
