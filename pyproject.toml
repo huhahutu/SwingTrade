@@ -1,0 +1,72 @@
+[project]
+name = "swing-trade-ai-bot"
+version = "0.1.0"
+description = "AI活用型スイングトレード自動売買システム (Phase 1)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "yfinance>=0.2.36",
+    "google-genai>=0.5.0", # Gemini 2.5 Flash API用
+    "fastapi>=0.109.2",
+    "uvicorn>=0.27.1",
+    "pydantic>=2.6.1",     # JSON Schemaのパース用
+    "pandas>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+    "pytest>=8.0.0",       # TDD用
+    "pytest-asyncio>=0.23.5",
+]
+
+[tool.ruff]
+# AIの生成スピードを落とさず、かつ可読性を保つための標準的な行長
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# AIに守らせる静的解析ルールの指定
+select = [
+    "E",   # pycodestyle (エラー)
+    "F",   # Pyflakes (論理エラー)
+    "I",   # isort (インポートの自動整理)
+    "UP",  # pyupgrade (モダンなPython構文の強制)
+    "B",   # flake8-bugbear (潜在的なバグの検出)
+    "SIM", # flake8-simplify (コードの簡略化)
+    "N",   # pep8-naming (命名規則)
+]
+ignore = []
+
+# fix on save (保存時の自動修正) で安全に修正できるものを指定
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+# フォーマットはBlack互換を維持
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+# AIに厳格な型推論を強制し、暴走リスクやバグを未然に防ぐ (Strictモード)
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# サードパーティライブラリ（yfinance等）の型ヒント欠如によるエラーを無視
+[[tool.mypy.overrides]]
+module = [
+    "yfinance.*",
+    "pandas.*",
+]
+ignore_missing_imports = true
