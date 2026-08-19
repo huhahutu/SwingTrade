@@ -31,12 +31,15 @@ class SentimentAnalyzer:
     """Gemini 2.5 Flash API を利用してニューステキストのセンチメント解析を行うアナライザー"""
 
     def __init__(self, api_key: str | None = None) -> None:
-        key = api_key or os.getenv("GEMINI_API_KEY")
-        if not key:
-            raise ValueError(
-                "GEMINI_API_KEY が設定されていません。.env ファイルまたは環境変数を確認してください。"
-            )
-        self.api_key = key
+        if api_key:
+            self.api_key = api_key
+        else:
+            from src.secrets import get_secret
+            try:
+                self.api_key = get_secret("GEMINI_API_KEY")
+            except Exception as e:
+                raise ValueError(f"GEMINI_API_KEY の取得に失敗しました: {e}")
+                
         self.client = genai.Client(api_key=self.api_key)
 
     def analyze_news(

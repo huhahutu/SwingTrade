@@ -64,29 +64,60 @@ def run_pipeline(
     return log_record
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="スイングトレード自動売買システム - プロトタイプ (Phase 1)"
-    )
-    parser.add_argument(
-        "--ticker",
-        type=str,
-        default="7203.T",
-        help="対象銘柄コード (例: 7203.T)",
-    )
-    parser.add_argument(
-        "--log-file",
-        type=str,
-        default="data/trade_logs.jsonl",
-        help="ログ出力先ファイルパス",
-    )
-    args = parser.parse_args()
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
+app = FastAPI(
+    title="SwingTrade API",
+    description="スイングトレード自動売買システム - プロトタイプ (Phase 2: Dapr統合)",
+    version="0.2.0",
+)
+
+class TradeRequest(BaseModel):
+    ticker: str = "7203.T"
+    log_file: str = "data/trade_logs.jsonl"
+
+@app.post("/trade")
+def trade_endpoint(request: TradeRequest) -> dict:
+    """API経由でスイングトレード自動判定パイプラインを実行する"""
     try:
-        run_pipeline(ticker_symbol=args.ticker, log_file_path=args.log_file)
+        result = run_pipeline(
+            ticker_symbol=request.ticker,
+            log_file_path=request.log_file
+        )
+        return {"status": "success", "data": result}
     except Exception as e:
-        print(f"\n[エラーが発生しました]: {e}", file=sys.stderr)
-        sys.exit(1)
+        raise HTTPException(status_code=500, detail=str(e))
+
+def main() -> None:
+    # 引数が渡された場合は従来のCLIモードとして動作、引数なし(または--api)の場合はFastAPIサーバー起動
+    if len(sys.argv) > 1 and sys.argv[1] != "--api":
+        parser = argparse.ArgumentParser(
+            description="スイングトレード自動売買システム - プロトタイプ (Phase 2)"
+        )
+        parser.add_argument(
+            "--ticker",
+            type=str,
+            default="7203.T",
+            help="対象銘柄コード (例: 7203.T)",
+        )
+        parser.add_argument(
+            "--log-file",
+            type=str,
+            default="data/trade_logs.jsonl",
+            help="ログ出力先ファイルパス",
+        )
+        args = parser.parse_args()
+
+        try:
+            run_pipeline(ticker_symbol=args.ticker, log_file_path=args.log_file)
+        except Exception as e:
+            print(f"\n[エラーが発生しました]: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Starting FastAPI server on port 8000...")
+        uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 
 if __name__ == "__main__":

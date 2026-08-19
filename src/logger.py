@@ -50,4 +50,18 @@ class KnowledgeLogger:
         with open(self.file_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
+        # Dapr State Store への保存 (Dapr稼働時のみ)
+        import os
+        if os.getenv("DAPR_GRPC_PORT") or os.getenv("DAPR_HTTP_PORT"):
+            from dapr.clients import DaprClient # type: ignore
+            try:
+                with DaprClient() as client:
+                    client.save_state(
+                        store_name="statestore",
+                        key=f"trade_{record['trade_id']}",
+                        value=json.dumps(record, ensure_ascii=False)
+                    )
+            except Exception as e:
+                print(f"[Warning] Dapr State Store への保存に失敗しました: {e}")
+
         return record
