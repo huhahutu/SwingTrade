@@ -1,9 +1,8 @@
-import json
-import os
 from typing import Literal
-from pydantic import BaseModel, Field
+
 from google import genai
 from google.genai import types
+from pydantic import BaseModel, Field
 
 
 class SentimentAnalysisResult(BaseModel):
@@ -16,15 +15,9 @@ class SentimentAnalysisResult(BaseModel):
     action: Literal["BUY", "SELL", "HOLD"] = Field(
         ..., description="推薦アクション (BUY, SELL, HOLD)"
     )
-    catalyst_summary: str = Field(
-        ..., description="判定の根拠となった重要ニュースの要約"
-    )
-    risk_factors: str = Field(
-        ..., description="材料出尽くしや一時的要因などの懸念点"
-    )
-    confidence_level: float = Field(
-        ..., ge=0.0, le=1.0, description="AIの確信度 (0.0 - 1.0)"
-    )
+    catalyst_summary: str = Field(..., description="判定の根拠となった重要ニュースの要約")
+    risk_factors: str = Field(..., description="材料出尽くしや一時的要因などの懸念点")
+    confidence_level: float = Field(..., ge=0.0, le=1.0, description="AIの確信度 (0.0 - 1.0)")
 
 
 class SentimentAnalyzer:
@@ -35,16 +28,15 @@ class SentimentAnalyzer:
             self.api_key = api_key
         else:
             from src.secrets import get_secret
+
             try:
                 self.api_key = get_secret("GEMINI_API_KEY")
             except Exception as e:
                 raise ValueError(f"GEMINI_API_KEY の取得に失敗しました: {e}")
-                
+
         self.client = genai.Client(api_key=self.api_key)
 
-    def analyze_news(
-        self, ticker_symbol: str, news_text: str
-    ) -> SentimentAnalysisResult:
+    def analyze_news(self, ticker_symbol: str, news_text: str) -> SentimentAnalysisResult:
         """
         指定銘柄のニューステキストを分析し、構造化されたセンチメント評価結果を返す
         """

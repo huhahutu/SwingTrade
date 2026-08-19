@@ -2,8 +2,8 @@ import json
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Literal
-import yfinance as yf
 
+import yfinance as yf
 
 # 損益がこの閾値内（絶対値）なら DRAW と判定する
 _DRAW_THRESHOLD = 0.005  # ±0.5%
@@ -90,7 +90,7 @@ class TradeEvaluator:
 
         bought_price が None のレコードはそのまま保持する。
         """
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             records = [json.loads(line) for line in f if line.strip()]
 
         updated_records = []

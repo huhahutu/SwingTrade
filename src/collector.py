@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import Literal
+
 import yfinance as yf
 
 
 @dataclass
 class StockData:
     """株価データのデータクラス"""
+
     ticker_symbol: str
     latest_close: float
     ma25_trend: Literal["UPWARD", "FLAT", "DOWNWARD"]
@@ -23,7 +25,9 @@ class StockDataCollector:
         df = ticker.history(period="60d")
 
         if df.empty or len(df) < 25:
-            raise ValueError(f"銘柄 {ticker_symbol} のデータが十分ではありません（25日以上必要です）。")
+            raise ValueError(
+                f"銘柄 {ticker_symbol} のデータが十分ではありません（25日以上必要です）。"
+            )
 
         # 25日移動平均線を算出
         ma25 = df["Close"].rolling(window=25).mean()

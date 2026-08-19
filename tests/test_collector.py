@@ -1,8 +1,8 @@
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 import pandas as pd
 
-from src.collector import StockDataCollector, StockData
+from src.collector import StockData, StockDataCollector
 
 
 def create_mock_df(prices: list[float]) -> pd.DataFrame:

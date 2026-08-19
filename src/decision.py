@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal
-from src.collector import StockData
+
 from src.analyzer import SentimentAnalysisResult
+from src.collector import StockData
 
 
 @dataclass

@@ -1,9 +1,10 @@
-from datetime import datetime
 import json
-from pathlib import Path
 import uuid
-from src.collector import StockData
+from datetime import datetime
+from pathlib import Path
+
 from src.analyzer import SentimentAnalysisResult
+from src.collector import StockData
 from src.decision import DecisionResult
 
 
@@ -33,7 +34,9 @@ class KnowledgeLogger:
                 "entry_price": stock_data.latest_close,
             },
             "execution_result": {
-                "bought_price": stock_data.latest_close if decision_result.final_action == "BUY" else None,
+                "bought_price": stock_data.latest_close
+                if decision_result.final_action == "BUY"
+                else None,
                 "sold_price": None,
                 "profit_loss_rate": None,
                 "stop_loss_triggered": None,
@@ -52,14 +55,16 @@ class KnowledgeLogger:
 
         # Dapr State Store への保存 (Dapr稼働時のみ)
         import os
+
         if os.getenv("DAPR_GRPC_PORT") or os.getenv("DAPR_HTTP_PORT"):
-            from dapr.clients import DaprClient # type: ignore
+            from dapr.clients import DaprClient  # type: ignore
+
             try:
                 with DaprClient() as client:
                     client.save_state(
                         store_name="statestore",
                         key=f"trade_{record['trade_id']}",
-                        value=json.dumps(record, ensure_ascii=False)
+                        value=json.dumps(record, ensure_ascii=False),
                     )
             except Exception as e:
                 print(f"[Warning] Dapr State Store への保存に失敗しました: {e}")

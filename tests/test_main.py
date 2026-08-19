@@ -1,9 +1,6 @@
-import pytest
-from unittest.mock import MagicMock, patch
-
-from src.collector import StockData
-from src.analyzer import SentimentAnalysisResult
 from main import run_pipeline
+from src.analyzer import SentimentAnalysisResult
+from src.collector import StockData
 
 
 def test_run_pipeline_success(mocker, tmp_path):

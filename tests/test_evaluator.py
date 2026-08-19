@@ -1,12 +1,14 @@
 import json
-import pytest
 from datetime import date, timedelta
-from unittest.mock import MagicMock, patch
-import pandas as pd
+from unittest.mock import MagicMock
 
-from src.evaluator import TradeEvaluator, EvaluationResult
+import pandas as pd
+import pytest
+
+from src.evaluator import EvaluationResult, TradeEvaluator
 
 # --- テスト用フィクスチャ ---
+
 
 @pytest.fixture
 def sample_buy_record():
@@ -62,6 +64,7 @@ def _make_price_df(price: float, trade_date: str, holding_days: int) -> pd.DataF
 
 
 # --- 正常系テスト ---
+
 
 def test_evaluate_win(mocker, sample_buy_record):
     """5日後の株価が買値より +2% 上昇 → WIN になること"""
@@ -144,7 +147,7 @@ def test_update_jsonl(mocker, sample_buy_record, tmp_path):
     evaluator = TradeEvaluator(holding_days=5)
     evaluator.update_log_file(str(log_file))
 
-    with open(log_file, "r", encoding="utf-8") as f:
+    with open(log_file, encoding="utf-8") as f:
         updated = json.loads(f.readline())
 
     assert updated["trade_outcome"] == "WIN"

@@ -1,8 +1,7 @@
 import json
-import pytest
 
-from src.collector import StockData
 from src.analyzer import SentimentAnalysisResult
+from src.collector import StockData
 from src.decision import DecisionResult
 from src.logger import KnowledgeLogger
 

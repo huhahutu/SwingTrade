@@ -1,7 +1,8 @@
 import pytest
-from src.collector import StockData
+
 from src.analyzer import SentimentAnalysisResult
-from src.decision import TradeDecisionMaker, DecisionResult
+from src.collector import StockData
+from src.decision import DecisionResult, TradeDecisionMaker
 
 
 @pytest.fixture
@@ -29,9 +30,7 @@ def base_sentiment_result():
 def test_decision_buy_when_both_conditions_met(base_stock_data, base_sentiment_result):
     """条件A (UPWARD) かつ 条件B (score>=4.0) の場合に BUY となるテスト"""
     decision_maker = TradeDecisionMaker()
-    result: DecisionResult = decision_maker.make_decision(
-        base_stock_data, base_sentiment_result
-    )
+    result: DecisionResult = decision_maker.make_decision(base_stock_data, base_sentiment_result)
 
     assert result.final_action == "BUY"
     assert result.is_buy_triggered is True

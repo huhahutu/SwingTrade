@@ -1,8 +1,8 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from pydantic import ValidationError
+from unittest.mock import MagicMock
 
-from src.analyzer import SentimentAnalyzer, SentimentAnalysisResult
+import pytest
+
+from src.analyzer import SentimentAnalysisResult, SentimentAnalyzer
 
 
 def test_sentiment_analysis_result_schema():

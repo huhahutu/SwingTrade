@@ -1,5 +1,7 @@
 import os
+
 from dapr.clients import DaprClient  # type: ignore
+
 
 def get_secret(key: str, secret_store_name: str = "local-secret-store") -> str:
     """
@@ -14,10 +16,14 @@ def get_secret(key: str, secret_store_name: str = "local-secret-store") -> str:
                 if response and response.secret and key in response.secret:
                     return response.secret[key]
         except Exception as e:
-            print(f"[Warning] Dapr Secrets API からの {key} 取得に失敗しました: {e}. 環境変数をフォールバックとして使用します。")
-    
+            print(
+                f"[Warning] Dapr Secrets API からの {key} 取得に失敗しました: {e}. 環境変数をフォールバックとして使用します。"
+            )
+
     # Daprから取得できなかった場合、またはDapr未稼働の場合は環境変数から取得
     val = os.getenv(key)
     if not val:
-        raise ValueError(f"シークレット '{key}' がストア '{secret_store_name}' および環境変数から取得できませんでした。")
+        raise ValueError(
+            f"シークレット '{key}' がストア '{secret_store_name}' および環境変数から取得できませんでした。"
+        )
     return val
