@@ -1,2 +1,6 @@
 [tools]
+dapr = "latest"
 python = "3.13"
+
+[env]
+_.file = ".env"
