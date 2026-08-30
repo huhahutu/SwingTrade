@@ -2,6 +2,7 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from src.analyzer import SentimentAnalysisResult
 from src.collector import StockData
@@ -19,16 +20,20 @@ class KnowledgeLogger:
         stock_data: StockData,
         sentiment_result: SentimentAnalysisResult,
         decision_result: DecisionResult,
-    ) -> dict:
+        news_content: str = "",
+    ) -> dict[str, Any]:
         """
         取引判定結果をDocs/design.mdおよびknowledge_rag.mdの仕様に沿ってJSONLファイルへ保存する
         """
-        record = {
+        record: dict[str, Any] = {
             "trade_id": str(uuid.uuid4()),
             "date": datetime.now().strftime("%Y-%m-%d"),
             "ticker_symbol": stock_data.ticker_symbol,
+            "news_content": news_content,
             "ai_score": sentiment_result.sentiment_score,
-            "ai_action_reason": f"AI Action={sentiment_result.action}: {sentiment_result.catalyst_summary}",
+            "ai_action_reason": (
+                f"AI Action={sentiment_result.action}: {sentiment_result.catalyst_summary}"
+            ),
             "catalyst_summary": sentiment_result.catalyst_summary,
             "risk_factors": sentiment_result.risk_factors,
             "technical_indicators": {
@@ -45,7 +50,9 @@ class KnowledgeLogger:
                 "holding_period_days": None,
             },
             "trade_outcome": None,
-            "post_analysis_notes": f"Final Decision: {decision_result.final_action}. Reason: {decision_result.reason}",
+            "post_analysis_notes": (
+                f"Final Decision: {decision_result.final_action}. Reason: {decision_result.reason}"
+            ),
         }
 
         # 保存先ディレクトリが存在しない場合は作成
@@ -59,7 +66,7 @@ class KnowledgeLogger:
         import os
 
         if os.getenv("DAPR_GRPC_PORT") or os.getenv("DAPR_HTTP_PORT"):
-            from dapr.clients import DaprClient  # type: ignore
+            from dapr.clients import DaprClient
 
             try:
                 with DaprClient() as client:

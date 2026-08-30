@@ -34,7 +34,8 @@ class TradeDecisionMaker:
         is_score_high = sentiment_result.sentiment_score >= 4.0
         if not is_score_high:
             reasons.append(
-                f"AIセンチメントスコアが基準値(4.0)未満です (score={sentiment_result.sentiment_score})"
+                f"AIセンチメントスコアが基準値(4.0)未満です "
+                f"(score={sentiment_result.sentiment_score})"
             )
 
         if is_ma25_upward and is_score_high:

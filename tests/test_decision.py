@@ -6,7 +6,7 @@ from src.decision import DecisionResult, TradeDecisionMaker
 
 
 @pytest.fixture
-def base_stock_data():
+def base_stock_data() -> StockData:
     return StockData(
         ticker_symbol="7203.T",
         latest_close=2500.0,
@@ -16,7 +16,7 @@ def base_stock_data():
 
 
 @pytest.fixture
-def base_sentiment_result():
+def base_sentiment_result() -> SentimentAnalysisResult:
     return SentimentAnalysisResult(
         ticker_symbol="7203.T",
         sentiment_score=4.5,
@@ -27,7 +27,9 @@ def base_sentiment_result():
     )
 
 
-def test_decision_buy_when_both_conditions_met(base_stock_data, base_sentiment_result):
+def test_decision_buy_when_both_conditions_met(
+    base_stock_data: StockData, base_sentiment_result: SentimentAnalysisResult
+) -> None:
     """条件A (UPWARD) かつ 条件B (score>=4.0) の場合に BUY となるテスト"""
     decision_maker = TradeDecisionMaker()
     result: DecisionResult = decision_maker.make_decision(base_stock_data, base_sentiment_result)
@@ -37,7 +39,9 @@ def test_decision_buy_when_both_conditions_met(base_stock_data, base_sentiment_r
     assert "判定成功" in result.reason or "BUY" in result.reason
 
 
-def test_decision_hold_when_ma25_not_upward(base_stock_data, base_sentiment_result):
+def test_decision_hold_when_ma25_not_upward(
+    base_stock_data: StockData, base_sentiment_result: SentimentAnalysisResult
+) -> None:
     """MA25がFLAT/DOWNWARDの場合、AI scoreが4.5でも HOLD になるテスト"""
     base_stock_data.ma25_trend = "FLAT"
     decision_maker = TradeDecisionMaker()
@@ -48,7 +52,9 @@ def test_decision_hold_when_ma25_not_upward(base_stock_data, base_sentiment_resu
     assert "25日移動平均線が上向きではありません" in result.reason
 
 
-def test_decision_hold_when_score_low(base_stock_data, base_sentiment_result):
+def test_decision_hold_when_score_low(
+    base_stock_data: StockData, base_sentiment_result: SentimentAnalysisResult
+) -> None:
     """AI scoreが3.9以下の場合、MA25がUPWARDでも HOLD になるテスト"""
     base_sentiment_result.sentiment_score = 3.9
     decision_maker = TradeDecisionMaker()

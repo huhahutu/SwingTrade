@@ -15,6 +15,7 @@ dependencies = [
     "dapr>=1.18.3",
     "dapr-ext-fastapi>=1.18.3",
     "feedparser>=6.0.10",
+    "chromadb>=1.5.9",
 ]
 
 [project.optional-dependencies]
@@ -76,6 +77,7 @@ module = [
     "yfinance.*",
     "pandas.*",
     "feedparser.*",
+    "chromadb.*",
 ]
 ignore_missing_imports = true
 

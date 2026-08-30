@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import date, timedelta
-from typing import Literal
+from typing import Any, Literal
 
 import yfinance as yf
 
@@ -30,12 +30,13 @@ class TradeEvaluator:
     def __init__(self, holding_days: int = 5) -> None:
         self.holding_days = holding_days
 
-    def evaluate(self, record: dict) -> EvaluationResult | None:
+    def evaluate(self, record: dict[str, Any]) -> EvaluationResult | None:
         """
         1件の取引ログを評価する。
 
         bought_price が None のレコード（HOLD判定など）、
-        またはすでに trade_outcome が確定済み (None, "DRAW", "" 以外) のレコードはスキップして None を返す。
+        またはすでに trade_outcome が確定済み (None, "DRAW", "" 以外) のレコードは
+        スキップして None を返す。
         """
         bought_price: float | None = record["execution_result"]["bought_price"]
         outcome = record.get("trade_outcome")
@@ -69,11 +70,11 @@ class TradeEvaluator:
 
         # 勝敗判定
         if abs(profit_loss_rate) <= _DRAW_THRESHOLD:
-            outcome: Literal["WIN", "LOSS", "DRAW"] = "DRAW"
+            outcome_str: Literal["WIN", "LOSS", "DRAW"] = "DRAW"
         elif profit_loss_rate > 0:
-            outcome = "WIN"
+            outcome_str = "WIN"
         else:
-            outcome = "LOSS"
+            outcome_str = "LOSS"
 
         return EvaluationResult(
             trade_id=record["trade_id"],
@@ -81,19 +82,23 @@ class TradeEvaluator:
             sold_price=sold_price,
             profit_loss_rate=round(profit_loss_rate, 6),
             holding_period_days=actual_holding_days,
-            trade_outcome=outcome,
+            trade_outcome=outcome_str,
         )
 
-    def update_log_file(self, file_path: str) -> None:
+    def update_log_file(
+        self,
+        file_path: str,
+        sync_rag: bool = True,
+        chroma_dir: str | None = "data/chroma_db",
+    ) -> None:
         """
         trade_logs.jsonl を読み込み、評価結果（損益率・trade_outcome）を上書き保存する。
-
-        bought_price が None のレコードはそのまま保持する。
+        sync_rag が True の場合は Chroma DB にも同期する。
         """
         with open(file_path, encoding="utf-8") as f:
-            records = [json.loads(line) for line in f if line.strip()]
+            records: list[dict[str, Any]] = [json.loads(line) for line in f if line.strip()]
 
-        updated_records = []
+        updated_records: list[dict[str, Any]] = []
         for record in records:
             result = self.evaluate(record)
             if result is not None:
@@ -109,6 +114,16 @@ class TradeEvaluator:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
         print(f"[evaluator] {len(updated_records)} 件のレコードを更新しました: {file_path}")
+
+        if sync_rag:
+            try:
+                from src.rag_store import RagStore
+
+                store = RagStore(persist_directory=chroma_dir)
+                synced_count = store.sync_from_trade_logs(jsonl_path=file_path)
+                print(f"[evaluator] {synced_count} 件のレコードを Chroma DB に同期しました。")
+            except Exception as e:
+                print(f"[evaluator] Chroma DB 同期中に警告が発生しました: {e}")
 
 
 if __name__ == "__main__":

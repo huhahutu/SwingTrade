@@ -32,32 +32,48 @@ class SentimentAnalyzer:
             try:
                 self.api_key = get_secret("GEMINI_API_KEY")
             except Exception as e:
-                raise ValueError(f"GEMINI_API_KEY の取得に失敗しました: {e}")
+                raise ValueError(f"GEMINI_API_KEY の取得に失敗しました: {e}") from e
 
         self.client = genai.Client(api_key=self.api_key)
 
-    def analyze_news(self, ticker_symbol: str, news_text: str) -> SentimentAnalysisResult:
+    def analyze_news(
+        self,
+        ticker_symbol: str,
+        news_text: str,
+        rag_context: str | None = None,
+    ) -> SentimentAnalysisResult:
         """
         指定銘柄のニューステキストを分析し、構造化されたセンチメント評価結果を返す
         """
+        rag_section = f"\n{rag_context}\n" if rag_context else ""
+        guidance_text = (
+            "過去の類似事例における失敗パターン（材料出尽くし、一過性要因など）を踏まえた上で、"
+            "最新ニュースのインパクトとリスクを評価し、指定されたJSONフォーマットに従って"
+            "評価結果を出力してください。"
+            if rag_context
+            else "指定されたJSONフォーマットに従って評価結果を出力してください。"
+        )
+
         prompt = f"""
-以下の株式ニューステキストを分析し、指定されたJSONフォーマットに従って評価結果を出力してください。
+以下の株式ニューステキストを分析し、{guidance_text}
 
 対象銘柄コード: {ticker_symbol}
 ニュース本文:
 {news_text}
-
+{rag_section}
 【評価基準と注意事項】
 1. sentiment_scoreは以下の基準で厳しめに評価してください。
  - 5.0: 圧倒的なサプライズ（市場予想を大きく上回る上方修正、大規模な自社株買いなど）
  - 4.0: 明確な好材料（順調な決算、新製品の好調など）
  - 3.0: ニュートラル、または市場の想定内
  - 1.0〜2.0: 悪材料（下方修正、不祥事、減配など）
-2. risk_factors（懸念点）について、ニュース内に「一過性の利益」「為替差益によるもの」などの記載がないか、または「すでに株価に織り込み済み（材料出尽くし）」の可能性がないか深く考察して出力してください。
+2. risk_factors（懸念点）について、ニュース内に「一過性の利益」「為替差益によるもの」などの
+記載がないか、または「すでに株価に織り込み済み（材料出尽くし）」の可能性がないか
+深く考察して出力してください。
 """
 
         response = self.client.models.generate_content(
-            model="gemini-3.5-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
