@@ -29,6 +29,8 @@ class KnowledgeLogger:
             "ticker_symbol": stock_data.ticker_symbol,
             "ai_score": sentiment_result.sentiment_score,
             "ai_action_reason": f"AI Action={sentiment_result.action}: {sentiment_result.catalyst_summary}",
+            "catalyst_summary": sentiment_result.catalyst_summary,
+            "risk_factors": sentiment_result.risk_factors,
             "technical_indicators": {
                 "ma25_trend": stock_data.ma25_trend,
                 "entry_price": stock_data.latest_close,

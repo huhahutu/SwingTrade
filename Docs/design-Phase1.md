@@ -53,6 +53,8 @@
   "ticker_symbol": "STRING",
   "ai_score": "FLOAT",
   "ai_action_reason": "STRING",
+  "catalyst_summary": "STRING",
+  "risk_factors": "STRING",
   "technical_indicators": {
     "ma25_trend": "UPWARD | FLAT | DOWNWARD",
     "entry_price": "NUMBER (現在値・前日終値)"

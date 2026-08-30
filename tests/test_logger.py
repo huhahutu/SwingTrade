@@ -41,6 +41,8 @@ def test_log_trade_decision(tmp_path):
     assert "trade_id" in record
     assert record["ticker_symbol"] == "7203.T"
     assert record["ai_score"] == 4.5
+    assert record["catalyst_summary"] == "決算好調"
+    assert record["risk_factors"] == "なし"
     assert record["technical_indicators"]["ma25_trend"] == "UPWARD"
     assert record["technical_indicators"]["entry_price"] == 2500.0
     assert record["trade_outcome"] is None
