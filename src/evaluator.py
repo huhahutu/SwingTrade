@@ -90,15 +90,19 @@ class TradeEvaluator:
         file_path: str,
         sync_rag: bool = True,
         chroma_dir: str | None = "data/chroma_db",
+        sync_finetune: bool = True,
+        finetune_dataset_path: str = "data/finetune_dataset.jsonl",
     ) -> None:
         """
         trade_logs.jsonl を読み込み、評価結果（損益率・trade_outcome）を上書き保存する。
         sync_rag が True の場合は Chroma DB にも同期する。
+        sync_finetune が True の場合は WIN トレードをファインチューニング用データセットへ追記する。
         """
         with open(file_path, encoding="utf-8") as f:
             records: list[dict[str, Any]] = [json.loads(line) for line in f if line.strip()]
 
         updated_records: list[dict[str, Any]] = []
+        evaluated_results: list[tuple[dict[str, Any], EvaluationResult]] = []
         for record in records:
             result = self.evaluate(record)
             if result is not None:
@@ -107,6 +111,7 @@ class TradeEvaluator:
                 record["execution_result"]["profit_loss_rate"] = result.profit_loss_rate
                 record["execution_result"]["holding_period_days"] = result.holding_period_days
                 record["trade_outcome"] = result.trade_outcome
+                evaluated_results.append((record, result))
             updated_records.append(record)
 
         with open(file_path, "w", encoding="utf-8") as f:
@@ -124,6 +129,23 @@ class TradeEvaluator:
                 print(f"[evaluator] {synced_count} 件のレコードを Chroma DB に同期しました。")
             except Exception as e:
                 print(f"[evaluator] Chroma DB 同期中に警告が発生しました: {e}")
+
+        if sync_finetune:
+            try:
+                from src.dataset_generator import DatasetGenerator
+
+                generator = DatasetGenerator(output_path=finetune_dataset_path)
+                finetune_count = 0
+                for updated_record, result in evaluated_results:
+                    if result.trade_outcome == "WIN" and generator.save(updated_record):
+                        finetune_count += 1
+                if finetune_count > 0:
+                    print(
+                        f"[evaluator] {finetune_count} 件の WIN トレードを"
+                        f" {finetune_dataset_path} へ保存しました。"
+                    )
+            except Exception as e:
+                print(f"[evaluator] ファインチューニングデータ保存中に警告が発生しました: {e}")
 
 
 if __name__ == "__main__":
